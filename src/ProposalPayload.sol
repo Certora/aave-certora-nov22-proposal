@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import {IAaveEcosystemReserveController} from "./external/aave/IAaveEcosystemReserveController.sol";
 import {AaveV2Ethereum} from "@aave-address-book/AaveV2Ethereum.sol";
 import {AaveMisc} from "@aave-address-book/AaveMisc.sol";
+import {GovHelpers} from "@aave-helpers/GovHelpers.sol";
 
 contract ProposalPayload {
 
@@ -12,7 +13,7 @@ contract ProposalPayload {
     address internal constant AUSDC_TOKEN = 0xBcca60bB61934080951369a648Fb03DF4F96263C;
     uint256 internal constant USDC_VEST = 1_890_000 * 1e6;
 
-    address internal constant AAVE_TOKEN = 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
+    address internal constant AAVE_TOKEN = GovHelpers.AAVE;
 
     // $810,000 worth of AAVE tokens calculated according to the 30 day average price of AAVE
     // using CoinGecko historical data (data/aave-30d-price-coingecko.json)
