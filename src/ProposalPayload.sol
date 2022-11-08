@@ -14,13 +14,13 @@ contract ProposalPayload {
     uint256 internal constant USDC_VEST = 1_890_000 * 1e6;
 
     address internal constant AAVE_TOKEN = 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
-    uint256 internal constant AAVE_DECIMALS = 18;
-    uint256 internal constant AAVE_VEST_USDC_WORTH = 810_000 * 1e6;
-    // 30d average AAVE price calculated from CoinGecko historic data
-    uint256 internal constant AAVE_AVG_PRICE_30D_USDC = 81340000;
-    uint256 internal constant AAVE_VEST = AAVE_VEST_USDC_WORTH / AAVE_AVG_PRICE_30D_USDC
-        * 10**AAVE_DECIMALS;
 
+    // $810,000 worth of AAVE tokens calculated according to the 30 day average price of AAVE
+    // using CoinGecko historical data (data/aave-30d-price-coingecko.json)
+    uint256 internal constant AAVE_VEST = 9957999999999995712000;
+    
+    // account for the time since Sep. 13 since last proposal finished vesting and 
+    // this proposal, as of Nov. 12, 2022
     uint256 internal constant DURATION = 365 days - 60 days;
 
     /*****************
