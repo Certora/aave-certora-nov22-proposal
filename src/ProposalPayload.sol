@@ -5,7 +5,6 @@ import {IAaveEcosystemReserveController} from "./external/aave/IAaveEcosystemRes
 import {AaveV2Ethereum} from "@aave-address-book/AaveV2Ethereum.sol";
 
 contract ProposalPayload {
-    event StreamCreated(address token, uint streamID);
 
     address internal constant ECOSYSTEM_RESERVE = 0x25F2226B597E8F9514B3F68F00f494cF4f286491;
     // Certora Recipient address
@@ -39,7 +38,6 @@ contract ProposalPayload {
             block.timestamp,
             block.timestamp + DURATION
         );
-        emit StreamCreated(AUSDC_TOKEN, usdcStreamID);
 
         uint256 actualAmountAAVE = (AAVE_VEST / DURATION) * DURATION;
         uint256 aaveStreamID = IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
@@ -50,7 +48,6 @@ contract ProposalPayload {
             block.timestamp,
             block.timestamp + DURATION
         );
-        emit StreamCreated(AAVE_TOKEN, aaveStreamID);
     }
 
 }

@@ -64,15 +64,10 @@ contract ProposalPayloadTest is Test {
         // Pass vote and execute proposal
         GovHelpers.passVoteAndExecute(vm, proposalId);
 
-        uint usdcStreamID = nextCollectorStreamID;
-        console.log("usdc stream id");
-        console.log(usdcStreamID);
-        uint aaveStreamID = nextReserveStreamID;
-        console.log("aave stream id");
-        console.log(aaveStreamID);
-
         // Checking if the streams have been created properly
-        (
+        // scoping to avoid the "stack too deep" error
+        {
+            (
             address senderUSDC,
             address recipientUSDC,
             uint256 depositUSDC,
@@ -80,36 +75,38 @@ contract ProposalPayloadTest is Test {
             uint256 startTimeUSDC,
             uint256 stopTimeUSDC,
             uint256 remainingBalanceUSDC,
-        ) = STREAMABLE_AAVE_COLLECTOR.getStream(usdcStreamID);
+            ) = STREAMABLE_AAVE_COLLECTOR.getStream(nextCollectorStreamID);
 
-        assertEq(senderUSDC, AAVE_COLLECTOR);
-        assertEq(recipientUSDC, CERTORA_RECIPIENT);
-        assertEq(depositUSDC, actualAmountUSDC);
-        assertEq(tokenAddressUSDC, address(AUSDC));
-        assertEq(stopTimeUSDC - startTimeUSDC, DURATION);
-        assertEq(remainingBalanceUSDC, actualAmountUSDC);
-
-         (
-            address senderAAVE,
-            address recipientAAVE,
-            uint256 depositAAVE,
-            address tokenAddressAAVE,
-            uint256 startTimeAAVE,
-            uint256 stopTimeAAVE,
-            uint256 remainingBalanceAAVE,
-        ) = STREAMABLE_RESERVE.getStream(aaveStreamID);
-        assertEq(senderAAVE, ECOSYSTEM_RESERVE);
-        assertEq(recipientAAVE, CERTORA_RECIPIENT);
-        assertEq(depositAAVE, actualAmountAAVE);
-        assertEq(tokenAddressAAVE, address(AAVE));
-        assertEq(stopTimeAAVE - startTimeAAVE, DURATION);
-        assertEq(remainingBalanceAAVE, actualAmountAAVE);
+            assertEq(senderUSDC, AAVE_COLLECTOR);
+            assertEq(recipientUSDC, CERTORA_RECIPIENT);
+            assertEq(depositUSDC, actualAmountUSDC);
+            assertEq(tokenAddressUSDC, address(AUSDC));
+            assertEq(stopTimeUSDC - startTimeUSDC, DURATION);
+            assertEq(remainingBalanceUSDC, actualAmountUSDC);
+        }
+        {
+            (
+                address senderAAVE,
+                address recipientAAVE,
+                uint256 depositAAVE,
+                address tokenAddressAAVE,
+                uint256 startTimeAAVE,
+                uint256 stopTimeAAVE,
+                uint256 remainingBalanceAAVE,
+            ) = STREAMABLE_RESERVE.getStream(nextReserveStreamID);
+            assertEq(senderAAVE, ECOSYSTEM_RESERVE);
+            assertEq(recipientAAVE, CERTORA_RECIPIENT);
+            assertEq(depositAAVE, actualAmountAAVE);
+            assertEq(tokenAddressAAVE, address(AAVE));
+            assertEq(stopTimeAAVE - startTimeAAVE, DURATION);
+            assertEq(remainingBalanceAAVE, actualAmountAAVE);
+        }
 
         // Checking if Certora can withdraw from streams
         vm.startPrank(CERTORA_RECIPIENT);
         vm.warp(block.timestamp + DURATION + 1 days);
         uint256 currentUSDCStreamBalance = STREAMABLE_AAVE_COLLECTOR.balanceOf(
-            usdcStreamID,
+            nextCollectorStreamID,
             CERTORA_RECIPIENT
         );
         console.log("stream USDC balance");
@@ -118,10 +115,11 @@ contract ProposalPayloadTest is Test {
         console.log(actualAmountUSDC);
 
         STREAMABLE_AAVE_COLLECTOR.withdrawFromStream(
-            usdcStreamID, actualAmountUSDC
+            nextCollectorStreamID, actualAmountUSDC
         );
         STREAMABLE_RESERVE.withdrawFromStream(
-            aaveStreamID, actualAmountAAVE);
+            nextReserveStreamID, actualAmountAAVE
+        );
         uint256 nextCertoraUSDCBalance = AUSDC.balanceOf(CERTORA_RECIPIENT);
         uint256 nextCertoraAAVEBalance = AAVE.balanceOf(CERTORA_RECIPIENT);
         assertEq(initialCertoraUSDCBalance, nextCertoraUSDCBalance - actualAmountUSDC);
