@@ -4,31 +4,32 @@ pragma solidity ^0.8.0;
 import {IAaveEcosystemReserveController} from "./external/aave/IAaveEcosystemReserveController.sol";
 import {AaveV2Ethereum} from "@aave-address-book/AaveV2Ethereum.sol";
 
-/**
- * @title Chaos <> AAVE Proposal
- * @author Chaos
- * @notice Payload to execute the Chaos <> AAVE Proposal
- * Governance Forum Post: https://governance.aave.com/t/updated-proposal-chaos-labs-risk-simulation-platform/10025
- * Snapshot: https://snapshot.org/#/aave.eth/proposal/0xad105e87d4df487bbe1daec2cd94ca49d1ea595901f5773c1804107539288b59
- */
 contract ProposalPayload {
+    event StreamCreated(address token, uint streamID);
     /********************************
      *   CONSTANTS AND IMMUTABLES   *
      ********************************/
 
-    // Chaos Recipient address
-    address public constant CHAOS_RECIPIENT = 0xbC540e0729B732fb14afA240aA5A047aE9ba7dF0;
-    address public constant AUSDC_TOKEN = 0xBcca60bB61934080951369a648Fb03DF4F96263C;
+    address internal constant ECOSYSTEM_RESERVE = 0x25F2226B597E8F9514B3F68F00f494cF4f286491;
+    // Certora Recipient address
+    address internal constant CERTORA_BENEFICIARY = 0x0F11640BF66e2D9352d9c41434A5C6E597c5e4c8;
+    address internal constant AUSDC_TOKEN = 0xBcca60bB61934080951369a648Fb03DF4F96263C;
+    uint256 internal constant USDC_VEST = 1_890_000 * 1e6;
 
-    // ~500,000 aUSDC = $0.5 million
-    // Small additional amount to handle remainder condition during streaming
-    // duration 180 days = 15552000 --> (500000e6 + [15552000 - 3200000]) % 15552000 = 0
-    // https://github.com/bgd-labs/aave-ecosystem-reserve-v2/blob/release/final-proposal/src/AaveEcosystemReserveV2.sol#L229-L233
-    uint256 public constant AUSDC_STREAM_AMOUNT = 500000e6 + 12352000;
+    address internal constant AAVE_TOKEN = 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
+    uint256 internal constant AAVE_DECIMALS = 18;
+    uint256 internal constant AAVE_VEST_USDC_WORTH = 810_000 * 1e6;
+    // 30d average AAVE price calculated from CoinGecko historic data
+    uint256 internal constant AAVE_AVG_PRICE_30D_USDC = 81340000;
+    uint256 internal constant AAVE_VEST = AAVE_VEST_USDC_WORTH / AAVE_AVG_PRICE_30D_USDC
+        * 10**AAVE_DECIMALS;
 
-    // 12 months of 30 days ~ 1 year
-    uint256 public constant STREAMS_END = 360 days; // 6 months duration from start
-    uint256 public constant STREAMS_START = 180 days; // in 6 months
+    uint256 internal constant DURATION = 365 days - 60 days;
+
+    uint public usdcStreamID;
+    uint public aaveStreamID;
+
+
 
     /*****************
      *   FUNCTIONS   *
@@ -36,14 +37,35 @@ contract ProposalPayload {
 
     /// @notice The AAVE governance executor calls this function to implement the proposal.
     function execute() external {
-        // Stream of $0.5 million in aUSDC over 12 months
-        IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
+        uint256 actualAmountUSDC = (USDC_VEST / DURATION) * DURATION; // rounding
+        // Stream of $1.89 million in USDC over 12 months
+        usdcStreamID = IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
             AaveV2Ethereum.COLLECTOR,
-            CHAOS_RECIPIENT,
-            AUSDC_STREAM_AMOUNT,
+            CERTORA_BENEFICIARY,
+            actualAmountUSDC,
             AUSDC_TOKEN,
-            block.timestamp + STREAMS_START,
-            block.timestamp + STREAMS_END
+            block.timestamp,
+            block.timestamp + DURATION
         );
+        emit StreamCreated(AUSDC_TOKEN, usdcStreamID);
+
+        uint256 actualAmountAAVE = (AAVE_VEST / DURATION) * DURATION;
+        aaveStreamID = IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
+            ECOSYSTEM_RESERVE,
+            CERTORA_BENEFICIARY,
+            actualAmountAAVE,
+            AAVE_TOKEN,
+            block.timestamp,
+            block.timestamp + DURATION
+        );
+        emit StreamCreated(AAVE_TOKEN, aaveStreamID);
+    }
+
+    function getUSDCStreamID() public view returns (uint) { 
+        return usdcStreamID;
+    }
+
+    function getAAVEStreamID() public view returns (uint) {
+        return aaveStreamID;
     }
 }
