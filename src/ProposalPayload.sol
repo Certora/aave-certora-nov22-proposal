@@ -3,10 +3,10 @@ pragma solidity ^0.8.0;
 
 import {IAaveEcosystemReserveController} from "./external/aave/IAaveEcosystemReserveController.sol";
 import {AaveV2Ethereum} from "@aave-address-book/AaveV2Ethereum.sol";
+import {AaveMisc} from "@aave-address-book/AaveMisc.sol";
 
 contract ProposalPayload {
 
-    address internal constant ECOSYSTEM_RESERVE = 0x25F2226B597E8F9514B3F68F00f494cF4f286491;
     // Certora Recipient address
     address internal constant CERTORA_BENEFICIARY = 0x0F11640BF66e2D9352d9c41434A5C6E597c5e4c8;
     address internal constant AUSDC_TOKEN = 0xBcca60bB61934080951369a648Fb03DF4F96263C;
@@ -41,7 +41,7 @@ contract ProposalPayload {
 
         uint256 actualAmountAAVE = (AAVE_VEST / DURATION) * DURATION;
         uint256 aaveStreamID = IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
-            ECOSYSTEM_RESERVE,
+            AaveMisc.ECOSYSTEM_RESERVE,
             CERTORA_BENEFICIARY,
             actualAmountAAVE,
             AAVE_TOKEN,
