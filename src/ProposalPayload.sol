@@ -30,7 +30,7 @@ contract ProposalPayload {
     function execute() external {
         uint256 actualAmountUSDC = (USDC_VEST / DURATION) * DURATION; // rounding
         // Stream of $1.89 million in USDC over 12 months
-        uint256 usdcStreamID = IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
+        IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
             AaveV2Ethereum.COLLECTOR,
             CERTORA_BENEFICIARY,
             actualAmountUSDC,
@@ -40,7 +40,7 @@ contract ProposalPayload {
         );
 
         uint256 actualAmountAAVE = (AAVE_VEST / DURATION) * DURATION;
-        uint256 aaveStreamID = IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
+        IAaveEcosystemReserveController(AaveV2Ethereum.COLLECTOR_CONTROLLER).createStream(
             AaveMisc.ECOSYSTEM_RESERVE,
             CERTORA_BENEFICIARY,
             actualAmountAAVE,
