@@ -41,12 +41,8 @@ contract ProposalPayloadTest is Test {
     ProposalPayload public proposalPayload;
 
     function setUp() public {
-        // To fork at a specific block: vm.createSelectFork(vm.rpcUrl("mainnet", BLOCK_NUMBER));
         vm.createSelectFork(vm.rpcUrl("mainnet"));
-        // Deploy Payload
         proposalPayload = new ProposalPayload();
-
-        // Create Proposal
         vm.prank(AAVE_WHALE);
         proposalId = DeployMainnetProposal._deployMainnetProposal(
             address(proposalPayload),
@@ -55,8 +51,7 @@ contract ProposalPayloadTest is Test {
         
     }
 
-
-    // Full Payment Term Test.
+    // Full Vesting Test
     function testExecute() public {
 
         // Capturing next Stream IDs before proposal is executed
@@ -125,7 +120,6 @@ contract ProposalPayloadTest is Test {
         STREAMABLE_AAVE_COLLECTOR.withdrawFromStream(
             usdcStreamID, actualAmountUSDC
         );
-        // nextMainnetReserveFactorStreamID + 1 didn't work
         STREAMABLE_RESERVE.withdrawFromStream(
             aaveStreamID, actualAmountAAVE);
         uint256 nextCertoraUSDCBalance = AUSDC.balanceOf(CERTORA_RECIPIENT);
