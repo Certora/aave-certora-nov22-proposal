@@ -37,8 +37,8 @@ contract DeployProposal is Script {
     function run() external {
         vm.startBroadcast();
         DeployMainnetProposal._deployMainnetProposal(
-            address(0x691B41805f7Ef2D7De6165bC42295b035a31600D), // TODO: replace with mainnet payload address
-            bytes32(0x5d0543d0e66abc240eceeae5ada6240d4d6402c2ccfe5ad521824dc36be71c45) // TODO: replace with actual ipfshash
+            address(0x2D2b1Bf70d98ae9A8CC9A3d7a49C2d321eCC6C04),
+            bytes32(0x8c5c6b73375a981af5e6b8b1cf860500f5c2cfc0570a98203b7f6b48c03d42ba) // TODO: replace with actual ipfshash
         );
         vm.stopBroadcast();
     }
